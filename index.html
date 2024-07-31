@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Organic Hexagonal Grid</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #f0f0f0;
+        font-family: Arial, sans-serif;
+      }
+
+      .header {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.8);
+        text-align: center;
+        padding: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+      }
+
+      .honeycomb {
+        position: relative;
+        width: 100%;
+        height: calc(100vh - 100px);
+        overflow: hidden;
+        padding-top: 120px; /* Added padding to avoid header */
+      }
+
+      .hex {
+        position: absolute;
+        width: 15vw;
+        height: 17vw;
+        background-color: grey;
+        clip-path: polygon(
+          50% 0%,
+          100% 25%,
+          100% 75%,
+          50% 100%,
+          0% 75%,
+          0% 25%
+        );
+        transition: transform 0.3s, filter 0.3s;
+        cursor: pointer;
+        filter: grayscale(100%);
+      }
+
+      .hex img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        clip-path: inherit;
+      }
+
+      .hex:hover {
+        transform: scale(1.1);
+        filter: grayscale(0%);
+        z-index: 1;
+      }
+
+      .info-box {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .hex.big {
+        width: 22vw;
+        height: 25vw;
+        background-color: gold;
+        z-index: 1;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        filter: grayscale(100%);
+      }
+
+      .hex.big:hover {
+        transform: translate(-50%, -50%);
+        filter: brightness(100%);
+      }
+
+      .hex.big img {
+        clip-path: inherit;
+      }
+
+      .hex.with-image {
+        width: 16.5vw;
+        height: 19vw;
+      }
+
+      @media (max-width: 600px) {
+        .hex {
+          width: 20vw;
+          height: 23vw;
+        }
+        .hex.with-image {
+          width: 18vw;
+          height: 21vw;
+        }
+        .hex.big {
+          width: 28vw;
+          height: 32vw;
+        }
+        .info-box {
+          bottom: 10px;
+          padding: 5px;
+        }
+      }
+
+      @media (min-width: 1200px) {
+        .hex {
+          width: 10vw;
+          height: 11.5vw;
+        }
+        .hex.with-image {
+          width: 11vw;
+          height: 13vw;
+        }
+        .hex.big {
+          width: 15vw;
+          height: 17vw;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>ConnecTech Contributors</h1>
+    </div>
+    <div class="honeycomb" id="honeycomb">
+      <div
+        class="hex big"
+        data-info="I am Charan Teja B S, Full Stack Developer and the lead of this project"
+      >
+        <img src="CTMS.jpg" alt="Me" />
+      </div>
+    </div>
+    <div class="info-box" id="info-box"></div>
+    <script>
+      const contributors = [
+        {
+          name: "Chandan",
+          role: "Frontend Developer",
+          image: "CRN.JPG",
+        },
+        {
+          name: "Deekshitha",
+          role: "Frontend Developer",
+          image: "DB.jpg",
+        },
+        {
+          name: "Abhishek",
+          role: "Frontend Developer",
+          image: "PBA.jpg",
+        },
+        {
+          name: "Chandrashekhar",
+          role: "Idea Pitching",
+          image: "CDY.jpg",
+        },
+        {
+          name: "Wanna Contribute?",
+          role: "SQLite Developer",
+          image: "https://via.placeholder.com/150/ffff00",
+        },
+        {
+          name: "Wanna Contribute?",
+          role: "Django Developer",
+          image: "https://via.placeholder.com/150/ff00ff",
+        },
+      ];
+
+      const honeycomb = document.getElementById("honeycomb");
+      const infoBox = document.getElementById("info-box");
+
+      const hexCount = 9;
+
+      for (let i = 0; i < hexCount - 1; i++) {
+        const hex = document.createElement("div");
+        hex.className = "hex";
+        if (i < contributors.length) {
+          hex.classList.add("with-image");
+          const contributor = contributors[i];
+          const img = document.createElement("img");
+          img.src = contributor.image;
+          hex.appendChild(img);
+          hex.style.backgroundColor = "blue";
+          hex.dataset.info = `${contributor.name} - ${contributor.role}`;
+        }
+        honeycomb.appendChild(hex);
+      }
+
+      function randomPosition(element) {
+        const honeycombRect = honeycomb.getBoundingClientRect();
+        const elementRect = element.getBoundingClientRect();
+        const maxX = honeycombRect.width - elementRect.width;
+        const maxY = honeycombRect.height - elementRect.height;
+        const headerHeight = document.querySelector(".header").offsetHeight;
+
+        const x = Math.random() * maxX;
+        const y = Math.random() * (maxY - headerHeight) + headerHeight;
+
+        return { x, y };
+      }
+
+      function isCollision(rect1, rect2) {
+        return !(
+          rect1.right < rect2.left ||
+          rect1.left > rect2.right ||
+          rect1.bottom < rect2.top ||
+          rect1.top > rect2.bottom
+        );
+      }
+
+      function isWithinCenterRadius(x, y, radius) {
+        const dx = x - window.innerWidth / 2;
+        const dy = y - window.innerHeight / 2;
+        return Math.sqrt(dx * dx + dy * dy) < radius;
+      }
+
+      function placeHexagons() {
+        const hexes = document.querySelectorAll(".hex:not(.big)");
+        const placedHexes = [];
+
+        hexes.forEach((hex) => {
+          let position;
+          let collision;
+
+          do {
+            collision = false;
+            position = randomPosition(hex);
+            hex.style.left = `${position.x}px`;
+            hex.style.top = `${position.y}px`;
+
+            const hexRect = hex.getBoundingClientRect();
+            if (
+              isWithinCenterRadius(
+                position.x + hexRect.width / 2,
+                position.y + hexRect.height / 2,
+                173
+              )
+            ) {
+              collision = true;
+            } else {
+              placedHexes.forEach((otherHex) => {
+                const otherRect = otherHex.getBoundingClientRect();
+                if (isCollision(hexRect, otherRect)) {
+                  collision = true;
+                }
+              });
+            }
+          } while (collision);
+
+          placedHexes.push(hex);
+        });
+      }
+
+      document.querySelectorAll(".hex").forEach((hex) => {
+        hex.addEventListener("mouseover", (e) => {
+          infoBox.textContent = e.target.closest(".hex").dataset.info;
+          infoBox.style.opacity = 1;
+        });
+
+        hex.addEventListener("mouseleave", () => {
+          infoBox.style.opacity = 0;
+        });
+      });
+
+      window.addEventListener("load", placeHexagons);
+      window.addEventListener("resize", placeHexagons);
+    </script>
+  </body>
+</html>
